@@ -32,7 +32,7 @@ const transaction = await createNft(umi, {
     mint: collectionMint,
     name: "Drake's Collection",
     symbol: "DRAKE",
-    uri: "https://...",
+    uri: "https://raw.githubusercontent.com/mhmmdbduh/Soldev/refs/heads/master/NewNFT/5537889471.json",
     sellerFeeBasisPoints: percentAmount(0), 
     isCollection: true,
 });
