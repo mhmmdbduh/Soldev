@@ -1,11 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token_interface::{ Mint, TokenAccount, TokenInterface},
-
+    token_interface::{Mint, TokenAccount, TokenInterface},
 };
 
-use crate::create::{Offer, ANCHOR_DISCRIMINATOR};
+use crate::{Offer, ANCHOR_DISCRIMINATOR};
 
 use super::transfer_tokens;
 
@@ -14,7 +13,7 @@ use super::transfer_tokens;
 pub struct MakeOffer<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
-    
+
     #[account(mint::token_program = token_program)]
     pub token_mint_a: InterfaceAccount<'info, Mint>,
 
@@ -25,37 +24,37 @@ pub struct MakeOffer<'info> {
         mut,
         associated_token::mint = token_mint_a,
         associated_token::authority = maker,
-        associated_token::token_program = token_program,
+        associated_token::token_program = token_program
     )]
-    pub maker_token_account_a : InterfaceAccount<'info, TokenAccount>,
+    pub maker_token_account_a: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
         init,
         payer = maker,
         space = ANCHOR_DISCRIMINATOR + Offer::INIT_SPACE,
         seeds = [b"offer", maker.key().as_ref(), id.to_le_bytes().as_ref()],
-        bump,
+        bump
     )]
-
     pub offer: Account<'info, Offer>,
 
     #[account(
         init,
         payer = maker,
-        associated_token::mint = token_mint_a, 
-        associated_token::authority = offer, 
+        associated_token::mint = token_mint_a,
+        associated_token::authority = offer,
         associated_token::token_program = token_program
-
     )]
     pub vault: InterfaceAccount<'info, TokenAccount>,
 
     pub system_program: Program<'info, System>,
     pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-
 }
 
-pub fn send_offered_tokens_to_vault(context: &Context<MakeOffer>, token_a_offered_amount: u64) -> Result<()> {
+pub fn send_offered_tokens_to_vault(
+    context: &Context<MakeOffer>,
+    token_a_offered_amount: u64,
+) -> Result<()> {
     transfer_tokens(
         &context.accounts.maker_token_account_a,
         &context.accounts.vault,

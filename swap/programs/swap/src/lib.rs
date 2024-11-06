@@ -15,11 +15,14 @@ declare_id!("BQV3YAPL7849YpcAbSypg2CfBCofMf2oZQhRXT4wjjWe");
 pub mod swap {
     use super::*;
 
-    pub fn make_offer(context: Context<MakeOffer>) -> Result<()> {
-        instructions::make_offer::send_offered_tokens_to_vault()?;
-
-        instructions::make_offer::save_offer()
-
-        
+    pub fn make_offer(
+        context: Context<MakeOffer>, 
+        id: u64, 
+        token_a_offered_amount: u64, 
+        token_b_wanted_amount: u64,
+    ) -> Result<()> {
+        instructions::make_offer::send_offered_tokens_to_vault(&context, token_a_offered_amount)?;
+        instructions::make_offer::save_offer(context, id, token_b_wanted_amount);
+        Ok(())
     }
 }
