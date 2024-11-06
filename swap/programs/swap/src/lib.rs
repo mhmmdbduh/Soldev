@@ -25,4 +25,10 @@ pub mod swap {
         instructions::make_offer::save_offer(context, id, token_b_wanted_amount);
         Ok(())
     }
+
+    pub fn take_offer(context: Context<TakeOffer>) -> Result<()> {
+        instruction::take_offer::send_wanted_tokens_to_maker(&context)?;
+        instruction::take_offer::withdraw_and_close_vault(context);
+        Ok(())
+    }
 }
