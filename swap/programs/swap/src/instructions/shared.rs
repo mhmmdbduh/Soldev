@@ -17,9 +17,10 @@ pub fn transfer_token<'info> (
         authority: authority.to_account_info(),
     };
 
-    let cpi_context = CpiContext::new(program: token_program.to_account_info(), accounts: transfer_accounts_option);
+    let cpi_context = CpiContext::new(token_program.to_account_info(), transfer_accounts_option);
 
-    transfer_checked(cpi_context, *amount, mint.decimals);
+    transfer_checked(cpi_context, *amount, mint.decimals)?;
+    Ok(())
 
 
 }

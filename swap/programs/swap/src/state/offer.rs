@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-#[accounts]
+#[account]
 #[derive(InitSpace)]
 pub struct Offer {
     pub id: u64,
