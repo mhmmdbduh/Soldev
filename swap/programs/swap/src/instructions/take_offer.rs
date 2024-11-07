@@ -1,10 +1,12 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token_interface::{Mint, TokenAccount, TokenInterface},
+    token_interface::{
+        Mint, TokenAccount, TokenInterface, transfer_checked, CloseAccount, TransferChecked, close_account,
+    }
 };
 
-use crate::{Offer, ANCHOR_DISCRIMINATOR};
+use crate::Offer;
 
 use super::transfer_tokens;
 
@@ -70,6 +72,47 @@ pub struct TakeOffer<'info> {
 }
 
 
-pub fn send_wanted_tokens_to_maker(context: &Context<MakeOffer>) -> Result<()>{
-    Ok(())
+pub fn send_wanted_tokens_to_maker(context: &Context<TakeOffer>) -> Result<()>{
+    transfer_tokens(
+        &context.accounts.taker_token_account_b,
+        &context.accounts.maker_token_account_b,
+        &context.accounts.offer.token_b_wanted_amount,
+        &context.accounts.token_mint_b,
+        &context.accounts.taker,
+        &context.accounts.token_program
+    )
+}
+    
+pub fn withdraw_and_close_vault(context: Context<TakeOffer>)-> Result<()> {
+    let seeds = &[
+        b"offer",
+        context.accounts.maker.to_account_info().key.as_ref(),
+        &context.accounts.offer.id.to_le_bytes()[..],
+        &[context.accounts.offer.bump],
+    ];
+    let signer_seeds = [&seeds[..]];
+
+    let accounts = TransferChecked {
+        from: context.accounts.vault.to_account_info(),
+        to: context.accounts.taker_token_account_a.to_account_info(),
+        mint: context.accounts.token_mint_a.to_account_info(),
+        authority: context.accounts.offer.to_account_info(),
+    };
+
+    let cpi_context = 
+    CpiContext::new_with_signer(context.accounts.
+        token_program.to_account_info(),
+        accounts, &signer_seeds);
+    
+    transfer_checked(cpi_context, context.accounts.vault.amount, context.accounts.token_mint_a.decimals)?;
+
+    let accounts = CloseAccount {
+        account: context.accounts.vault.to_account_info(),
+        destination: context.accounts.taker.to_account_info(),
+        authority: context.accounts.offer.to_account_info(),
+    };
+
+    let cpi_context = CpiContext::new_with_signer(context.accounts.token_program.to_account_info(), accounts, &signer_seeds);
+
+    close_account(cpi_context)
 }
