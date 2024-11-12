@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { BanksClient, ProgramTestContext, startAnchor } from "solana-bankrun";
+import { BanksClient, Clock, ProgramTestContext, startAnchor } from "solana-bankrun";
 import { mintTo, createMint } from "spl-token-bankrun";
 
 
@@ -125,4 +125,26 @@ describe("Vesting Smart Contract Test", () => {
         console.log("Employee Account: ", employeeAccount.toBase58());
         
     })
+
+    it("should claim the employee's vested tokens", async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const currentClock = await banksClient.getClock();
+        context.setClock(
+            new Clock(
+                currentClock.slot,
+                currentClock.epochStartTimestamp, 
+                currentClock.epoch,
+                currentClock.leaderScheduleEpoch,
+                1000n,                
+            )
+        );
+
+        const tx3 = await program2.methods
+            .claimTokens(companyName)
+            .accounts({tokenProgram: TOKEN_PROGRAM_ID})
+            .rpc({commitment: "confirmed"});
+        console.log("Claim Tokens Tx:"  , tx3);
+    })
 });
+
