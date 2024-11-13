@@ -2,7 +2,7 @@
 
 import {getVestingProgram, getVestingProgramId} from '@project/anchor'
 import {useConnection} from '@solana/wallet-adapter-react'
-import {Cluster, Keypair, PublicKey} from '@solana/web3.js'
+import {Cluster, PublicKey} from '@solana/web3.js'
 import {useMutation, useQuery} from '@tanstack/react-query'
 import {useMemo} from 'react'
 import toast from 'react-hot-toast'
@@ -33,7 +33,7 @@ export function useVestingProgram() {
 
   const accounts = useQuery({
     queryKey: ['vesting', 'all', { cluster }],
-    queryFn: () => program.account.vesting.all(),
+    queryFn: () => program.account.vestingAccount.all(),
   })
 
   const getProgramAccount = useQuery({
